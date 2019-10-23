@@ -16,13 +16,7 @@ const initCarousel = function initCarousel(root, children) {
   let referenceX = 0; // スクロール開始時にreferenceとするXの値を保存する用
   let prevDelta = 0; // 前回スクロール時のX軸の差分を保存する用
 
-  root.addEventListener('mousedown', e => {
-    isMouseDown = true;
-    referenceX = e.clientX;
-    wrapper.classList.add('dragging');
-  });
-
-  const balancePosition = () => {
+  const balancePosition = function balancePosition() {
     const currDelta = wrapper.getBoundingClientRect().left;
     const rightBound =
       (children.length - (SLIDES_PER_SCREEN - NUM_BLANK_SLIDES_RIGHT)) *
@@ -59,27 +53,45 @@ const initCarousel = function initCarousel(root, children) {
     prevDelta = roundedX;
   };
 
-  root.addEventListener('mouseup', e => {
+  const onMouseDown = function onMouseDown(event) {
+    isMouseDown = true;
+    referenceX = event.clientX;
+    wrapper.classList.add('dragging');
+  };
+
+  const onMouseUp = function onMouseUp() {
     isMouseDown = false;
-
     balancePosition();
-  });
+  };
 
-  root.addEventListener('mouseleave', () => {
+  const onMouseLeave = function onMouseLeave() {
     isMouseDown = false;
-
     balancePosition();
-  });
+  };
 
-  root.addEventListener('mousemove', e => {
+  const onMouseMove = function onMouseMove(event) {
     if (!isMouseDown) return;
 
-    const deltaX = e.clientX - referenceX;
+    const deltaX = event.clientX - referenceX;
 
     requestAnimationFrame(() => {
       wrapper.style.transform = `translateX(${prevDelta + deltaX}px)`;
     });
-  });
+  };
+
+  root.addEventListener('mousedown', onMouseDown);
+  root.addEventListener('mouseup', onMouseUp);
+  root.addEventListener('mouseleave', onMouseLeave);
+  root.addEventListener('mousemove', onMouseMove);
+
+  const cleanUp = function cleanUp() {
+    root.removeEventListener('mousedown', onMouseDown);
+    root.removeEventListener('mouseup', onMouseUp);
+    root.removeEventListener('mouseleave', onMouseLeave);
+    root.removeEventListener('mousemove', onMouseMove);
+  };
+
+  return cleanUp;
 };
 
 export default initCarousel;
