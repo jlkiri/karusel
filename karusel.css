@@ -1,0 +1,8 @@
+.wrapper {
+  transition: left 300ms;
+  display: flex;
+  position: absolute;
+}
+.dragging {
+  transition: none;
+}
